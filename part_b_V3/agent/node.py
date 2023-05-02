@@ -1,4 +1,5 @@
 from math import log, sqrt
+import random
 from typing import Optional
 
 from referee.game.actions import Action
@@ -45,7 +46,7 @@ class Node:
                 best_score = score #更新最佳子节点的UCB1值
                 best_child = child #更新最佳子节点
         return best_child
-
+ 
     def best_child(self):
         # 返回当前节点的最佳子节点
         # UCB1算法
@@ -58,4 +59,6 @@ class Node:
             if score > best_score:  # 更新最佳子节点
                 best_score = score  # 更新最佳子节点的UCB1值
                 best_child = child  # 更新最佳子节点
+            elif score == best_score:  # 如果UCB1值相等，随机选择一个子节点
+                best_child = random.choice([best_child, child])
         return best_child

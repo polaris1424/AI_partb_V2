@@ -53,47 +53,63 @@ class Agent:
 
   
     def mcts(self, board) -> Action:
-        num_iterations = 1
+        num_iterations = 2
         print("***********************")
-        print(board.render())
+         
         root = Node(state=board) #初始化根节点,传入当前棋盘状态")
-        while(num_iterations):
+        while(num_iterations):         
             print("num_iterations:",num_iterations)
+            print("新的iteration 开始了，root的棋盘状态，应该只有一个棋子")
+            print(board.render())
+            lgeal_list =[]
+            lgeal_list = self.get_action_list(root.state,self._color)
             # Selection
-            select_node = self.selection(root)
+            select_node = self.selection(root,lgeal_list)
             print("==================seletion 完成==================")
 
             # expansion, spread random_node的六个方向
             # *6 spread, + empty cell spawn, random返回一个下一步随机的一个新的点
+            print("--------slect_node.state--------------``````````````: \n", select_node.state.render())
             random_node = self.expansion(select_node)
             print("==================expansion 完成==================")
             # Simulation
             socre = self.simulation(random_node)
             print("==================esimulation 完成==================")
-            print(random_node.state._state)
+            #print(random_node.state._state)
             # Backpropagation
             self.backpropagation(random_node, socre, self._color)
 
             print("==================回溯 完成==================")
-            print("root目前生成了几个child:", len(root.children))  
-
-            
-            
-            
+  
             num_iterations -= 1 #递减
-        
-        best_child = root.get_best_child() #获取child里ucb1值最高的
+
+        print("root目前生成了几个child:", len(root.children))  
+        for child in root.children:
+            print("child action:", child.action)
+            print("child_state:", child.state.render())
+
+        best_child = root.best_child() #获取child里ucb1值最高的
+        print("返回的beast action是: ",best_child.action)
         return best_child.action
 
     
     
-    def selection(self, node: Node) -> Optional[Node]:
+
+
+    def selection(self, node: Node, list: list) -> Optional[Node]:
+        print("检测sleection函数走了几次！！！！！！！")
         # 如果当前节点是终止节点或叶子节点，则返回当前节点
         if node.is_terminal() or node.is_leaf():
+            #print("走这》》》》》》")
            # print("select node 输出棋盘状态")
            # print(node.state.render())
             return node
+        #fully expanded
+        if len(node.children) != len(list):
+           # print("第二次走这》》》》》》")
+            return node
         # 否则，选择最佳子节点进行扩展
+        #print("无语住了》》》》》》")
         return self.selection(node.best_child())
 
     def expansion(self, node: Node) -> Node:
@@ -107,32 +123,39 @@ class Agent:
         #从当前棋盘获取颜色,如果是红子，获取棋盘上红子的位置,然后spread
         match self._color:
             case PlayerColor.RED:
-                action_list = self.get_action_list(node.state, self._color)
-                #随机返回一个action
-                random_action = random.choice(action_list)
-                #复制board
-                new_state = copy.deepcopy(node.state)
-                # 在copy_board 里apply action             
-                new_state.apply_action(random_action)
-                 # 将新节点添加到当前节点的子节点列表中
-                new_node = Node(parent=node, state=new_state, action=random_action)
-                print("新state 的 随机随机随机动作: ", random_action)
-                # 在copy_board 里apply action 
-                node.children.append(new_node)
-                return new_node
+                action_list = self.get_action_list(node.state,self._color) #获取所有可能的action
+                random_action = random.choice(action_list)#随机选择一个action
+                new_state = copy.deepcopy(node.state) #deepcopy当前棋盘状态               
+                new_state.apply_action(random_action)#在新棋盘上执行这个action
+                print("复制棋盘棋盘")
+                #print(new_state.render())          
+                new_node = Node(parent=node, state=new_state, action=random_action)#新建一个node，加入到children里
+                print("子节点的棋盘状态!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", new_node.state.render())
+                print("选择的随机动作动作: ", random_action)
+                node.children.append(new_node)#将新建的node加入到children里
+            
+                #deepcopy new_node
+                copy_node = copy.deepcopy(new_node)#deepcopy新建的node，供  simulation使用
+                return copy_node  #返回新建的node
             case PlayerColor.BLUE:
                 action_list = self.get_action_list(node.state,self._color)
                 random_action = random.choice(action_list)
+                #node.state.apply_action(random_action)
+                #print("没有复制的时候")
+                #print(node.state.render())
+
                 new_state = copy.deepcopy(node.state)                
                 new_state.apply_action(random_action)
                 print("复制棋盘棋盘")
-                print(new_state.render())          
+                #print(new_state.render())          
                 new_node = Node(parent=node, state=new_state, action=random_action)
+                print("子节点的棋盘状态!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", new_node.state.render())
                 print("选择的随机动作动作: ", random_action)
                 node.children.append(new_node)
-                #print("expansion结束，生成新状态，node.append child有几个孩子？？？？")
-                #print(len(node.children))
-                return new_node
+            
+                #deepcopy new_node
+                copy_node = copy.deepcopy(new_node)
+                return copy_node
 
     def get_action_list(self, board: Board, colour:PlayerColor) -> list:
         
@@ -160,8 +183,7 @@ class Agent:
         return action_list
 
     def simulation(self, node: Node) -> int:
-
-        #print("准备simulation，目前的棋盘状态是")
+        print("准备simulation，目前的棋盘状态是")
         print(node.state.render())
         #print("传入simulation时的颜色是：", self._color)
         #new node，从action_list中随机选择一个action，然后apply到棋盘上，返回reward
@@ -173,7 +195,6 @@ class Agent:
            # print("111111")
         else:
             colour = PlayerColor.RED
-        
            # print("22222") 
            
         print("颜色变成：", colour)  
@@ -193,18 +214,15 @@ class Agent:
                 colour = PlayerColor.RED 
                 #print("LINE 要找红色可以spread的***********: ", colour)
             
-            #print(state.render())
+           # print(state.render())
             #获取新的action_list
             if node.state._total_power >= 49:
                 #平局
-
                 print("平局,score = 0")
-                print("simulation 完成棋盘状态，在找哪个颜色的best_action: ",self._color)
-                return 0
-              
+                #print("simulation 完成棋盘状态，在找哪个颜色的best_action: ",self._color)
+                #print(state.render())
+                return 0           
             action_list = self.get_action_list(state, colour)
-
-            #action_list = node.get_action_list(state, color)
         #游戏结束， 如果是红色胜利，返回1，否则返回-1
         print("simulation 完成棋盘状态，在找哪个颜色的best_action: ",self._color)
         print(state.render())
