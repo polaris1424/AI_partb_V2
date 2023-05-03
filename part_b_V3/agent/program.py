@@ -6,7 +6,7 @@ from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 from referee.game.board import Board
 from typing import Optional
-from agent.node import Node
+from node import Node
 
 
 # This is the entry point for your game playing agent. Currently the agent
