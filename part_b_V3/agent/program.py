@@ -47,13 +47,18 @@ class Agent:
 
             case PlayerColor.BLUE:
                 #use MCTS to get the best action
-                best_action = self.mcts(self.board)
-                return best_action  
+                if self.board._state == {}: #empty board
+                    print("!!!!!!!!!!!!空")
+                    return SpawnAction(HexPos(3, 3))
+                else:
+                    #use MCTS to get the best action
+                    best_action = self.mcts(self.board)
+                    return best_action
 
 
   
     def mcts(self, board) -> Action:
-        num_iterations = 1000
+        num_iterations = 2
        # print("***********************")
          
         root = Node(state=board) #初始化根节点,传入当前棋盘状态")
@@ -69,12 +74,12 @@ class Agent:
 
             # expansion, spread random_node的六个方向
             # *6 spread, + empty cell spawn, random返回一个下一步随机的一个新的点
-            #print("--------slect_node.state--------------``````````````: \n", select_node.state.render())
+            print("--------slect_node.state--------------``````````````: \n", select_node.state.render())
             random_node = self.expansion(select_node)
             print("==================expansion 完成==================")
             # Simulation
             socre = self.simulation(random_node)
-            #print("==================esimulation 完成==================")
+            print("==================esimulation 完成==================")
             #print(random_node.state._state)
             # Backpropagation
             self.backpropagation(random_node, socre, self._color)
@@ -109,7 +114,8 @@ class Agent:
            # print("第二次走这》》》》》》")
             return node
         # 否则，选择最佳子节点进行扩展
-        #print("无语住了》》》》》》")
+        print("无语住了》》》》》》")
+        print(node.best_child)
         return self.selection(node.best_child())
 
     def expansion(self, node: Node) -> Node:
@@ -120,8 +126,10 @@ class Agent:
             case PlayerColor.RED:
                 action_list = self.get_action_list(node.state,self._color) #获取所有可能的action
                 random_action = random.choice(action_list)#随机选择一个action
-                new_state = copy.deepcopy(node.state) #deepcopy当前棋盘状态               
-                new_state.apply_action(random_action)#在新棋盘上执行这个action
+                new_state = copy.deepcopy(node.state) #deepcopy当前棋盘状态    
+                if(node.state._total_power <= 48):
+                    new_state.apply_action(random_action)#在新棋盘上执行这个action           
+                
                # print("复制棋盘棋盘")
                 #print(new_state.render())          
                 new_node = Node(parent=node, state=new_state, action=random_action)#新建一个node，加入到children里
@@ -134,8 +142,11 @@ class Agent:
                 return copy_node  #返回新建的node
             case PlayerColor.BLUE:
                 action_list = self.get_action_list(node.state,self._color)
+                #print("action_list:", action_list)
                 random_action = random.choice(action_list)
-                new_state = copy.deepcopy(node.state)                
+                new_state = copy.deepcopy(node.state)        
+                if(node.state._total_power >= 48):
+                    new_state.apply_action(random_action)#在新棋盘上执行这个action         
                 new_state.apply_action(random_action)
                      
                 new_node = Node(parent=node, state=new_state, action=random_action)
@@ -206,7 +217,7 @@ class Agent:
             
            # print(state.render())
             #获取新的action_list
-            if node.state._total_power >= 49:
+            if node.state._total_power >= 48:
                 #平局
                 print("平局,score = 0")
                 #print("simulation 完成棋盘状态，在找哪个颜色的best_action: ",self._color)
@@ -216,7 +227,7 @@ class Agent:
         #游戏结束， 如果是红色胜利，返回1，否则返回-1
         #print("simulation 完成棋盘状态，在找哪个颜色的best_action: ",self._color)
         #print(state.render())
-        if state.winner == PlayerColor.RED:
+        if state.winner_color == PlayerColor.RED:
             print("simulation 红色胜利,返回1")
             return 1
         else:
