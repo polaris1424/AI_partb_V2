@@ -6,7 +6,7 @@ from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 from referee.game.board import Board
 from typing import Optional
-from node import Node
+from agent.node import Node
 
 
 # This is the entry point for your game playing agent. Currently the agent
@@ -48,7 +48,7 @@ class Agent:
             case PlayerColor.BLUE:
                 #use MCTS to get the best action
                 if self.board._state == {}: #empty board
-                    print("!!!!!!!!!!!!空")
+                    #print("!!!!!!!!!!!!空")
                     return SpawnAction(HexPos(3, 3))
                 else:
                     #use MCTS to get the best action
@@ -74,12 +74,12 @@ class Agent:
 
             # expansion, spread random_node的六个方向
             # *6 spread, + empty cell spawn, random返回一个下一步随机的一个新的点
-            print("--------slect_node.state--------------``````````````: \n", select_node.state.render())
+            #print("--------slect_node.state--------------``````````````: \n", select_node.state.render())
             random_node = self.expansion(select_node)
-            print("==================expansion 完成==================")
+            #print("==================expansion 完成==================")
             # Simulation
             socre = self.simulation(random_node)
-            print("==================esimulation 完成==================")
+            #print("==================esimulation 完成==================")
             #print(random_node.state._state)
             # Backpropagation
             self.backpropagation(random_node, socre, self._color)
@@ -88,7 +88,7 @@ class Agent:
   
             num_iterations -= 1 #递减
 
-        print("root目前生成了几个child:", len(root.children))  
+        #print("root目前生成了几个child:", len(root.children))  
         #for child in root.children:
             #print("child action:", child.action)
            # print("child_state:", child.state.render())
@@ -114,13 +114,13 @@ class Agent:
            # print("第二次走这》》》》》》")
             return node
         # 否则，选择最佳子节点进行扩展
-        print("无语住了》》》》》》")
-        print(node.best_child)
+        #print("无语住了》》》》》》")
+        #print(node.best_child)
         return self.selection(node.best_child())
 
     def expansion(self, node: Node) -> Node:
         action_list = [] #store all possible actions including spawn and spread
-        print("查看传入expansion的棋盘状态应该是root的@@@@@@@@@@@@@@@@@@@@@@@@")
+        #print("查看传入expansion的棋盘状态应该是root的@@@@@@@@@@@@@@@@@@@@@@@@")
  
         match self._color:
             case PlayerColor.RED:
@@ -286,17 +286,52 @@ class Agent:
             for direction in HexDir:
                 spread_action_list.append(SpreadAction(cell, direction))
         return spread_action_list
-
     def take_empty_cell(self, board: Board) -> list:
         # given a board state, return a list of empty nodes
         #遍历整个字典，选择和coulor相同value的key
         empty_cell_list = []
+        rmlist = []
+        dir=[(0,1),(0,-1),(1,0),(-1,0),(1,-1),(-1,1)]
+        #print(board._state)
         for cell in board._state:
+            
+            if(board._state[cell].player != self._color and board._state[cell].player != None):
+                for direction in dir:
+                    #print("direction: ",direction)
+                    new_path = (cell.r, cell.q, direction[0], direction[1])
+                    new_pos = self.spread_pos(new_path, board._state[cell].power)
+                    #print("new_pos: ",new_pos)
+                    rmlist.extend(new_pos)
+                    #print("。。。。。。。。。。。。。。。。")
+                    #print(rmlist)
+                    #print(board._state)    
             if board._state[cell].player == None:
                 empty_cell_list.append(cell)
+        empty_cell_list=[k for k in empty_cell_list if k not in rmlist]
         #print("返回空棋盘,没有(3,3)")
         #print(empty_cell_list)
         return empty_cell_list
+    
+    def spread_pos(self,new_path,num): #point after spread
+        new_pos = []
+        x = new_path[0]
+        y = new_path[1]
+        for i in range(num):
+            x = x +new_path[2]  # 4
+            y = y+new_path[3] #7 ->0
+        
+            if(y > 6):
+                y = 0
+            if(y < 0):
+                y = 6
+
+            if(x > 6):
+                x= 0
+            if(x < 0):
+                x = 6
+            new_pos.append(HexPos(x,y))
+        return new_pos    
+
         
     def fully_spawn(self, list:list):
         #given a list of empty nodes, return a list of SpawnAction objects
