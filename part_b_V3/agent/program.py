@@ -6,7 +6,7 @@ from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir
 from referee.game.board import Board
 from typing import Optional
-from node import Node
+from agent.node import Node
 
 
 # This is the entry point for your game playing agent. Currently the agent
@@ -198,14 +198,15 @@ class Agent:
             colour = PlayerColor.RED
            # print("22222") 
            
-        #print("颜色变成：", colour)  
+        print("颜色变成：", colour)  
         action_list = self.get_action_list(state, colour)
         #color = self._color
         #print("这是啥？？？？？？？？？？？: ", color) #蓝色 self.color 没变
         while not state.game_over:
+            print("颜色：", colour)  
             random_action = random.choice(action_list)
             
-            #print("$$$$$$$模拟中选中的action: ", random_action)
+            print("$$$$$$$模拟中选中的action: ", random_action)
             state.apply_action(random_action)
             #切换颜色
             if colour == PlayerColor.RED:
@@ -214,8 +215,8 @@ class Agent:
             else:
                 colour = PlayerColor.RED 
                 #print("LINE 要找红色可以spread的***********: ", colour)
-            
-           # print(state.render())
+            print("颜色变成了：", colour) 
+            print(state.render())
             #获取新的action_list
             if node.state._total_power >= 48:
                 #平局
