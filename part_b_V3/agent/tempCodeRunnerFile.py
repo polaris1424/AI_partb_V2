@@ -1,2 +1,1 @@
-      legal_list = self.get_action_list(node.state,self._color)
-        print("get_action_list找的颜色", self._color)
+random_node = self.expansion(select_node,legal_list,

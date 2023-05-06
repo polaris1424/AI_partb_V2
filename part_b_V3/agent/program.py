@@ -59,15 +59,15 @@ class Agent:
 
   
     def mcts(self, board) -> Action:
-        num_iterations = 50#100不可以
-       # print("mcts开始***********************")
+        num_iterations = 100#，50可以100不可以
+        print("mcts开始***********************")
          
         root = Node(state=board) #初始化根节点,传入当前棋盘状态")
         #legal_list =[]  
         #root_action_list = self.get_action_list(root.state,self._color)
         #action_num = len(root_action_list) 
         while(num_iterations):                 
-            #print("num_iterations:",num_iterations)
+            print("num_iterations:",num_iterations)
            # print("新的iteration 开始了，root的棋盘状态，应该只有一个棋子")
             #print(board.render())
             legal_list =[]
@@ -83,18 +83,25 @@ class Agent:
             # expansion, spread random_node的六个方向
             # *6 spread, + empty cell spawn, random返回一个下一步随机的一个新的点
             #print("--------slect_node.state--------------``````````````: \n", select_node.state.render())
-            #if(num_iterations<=9):
-            #   print("expasion前的self_color 是：",self._color)
+            if(num_iterations<=60):
+                print("--------slect_node.state--------------``````````````: \n", select_node.state.render())
+
             random_node = self.expansion(select_node,legal_list, colour)  #update legal_list,remove random_node
             #print("==================expansion 完成==================")
+            if(num_iterations<=60):
+               print("==================expansion 完成，expansion后的状态==================")
+              # print(random_node.state.render())
+            
             # Simulation
-            #if(num_iterations<=9):
-               # print("simulation前的self_color 是：",self._color)
             socre = self.simulation(random_node,num_iterations)
+            if(num_iterations<=60):
+               print("==================simulation 完成==================")
             #print("==================esimulation 完成==================")
             #print(random_node.state._state)
             # Backpropagation
             self.backpropagation(random_node, socre, self._color)
+            
+
 
            # print("==================回溯 完成==================")
   
@@ -229,15 +236,17 @@ class Agent:
         return action_list
 
     def simulation(self, node: Node, num_iteration:int) -> int:
-        #print("准备simulation，expansion后的棋盘状态是")
-       #print(node.state.render())
+        if(num_iteration <60):
+             
+            print("准备simulation，expansion后的棋盘状态是")
+            print(node.state.render())
         #print("传入simulation时的颜色是：", node.action_colour)
         #new node，从action_list中随机选择一个action，然后apply到棋盘上，返回reward
         state = node.state
          
-        #if(num_iteration <=9):
+        if(num_iteration <= 50):
             #print("颜色是：", self._color)
-            #print("棋盘dict", state._state.values())   
+            print(node.state.render())  
         #board_dict中取出.player是红色的棋子，然后re_num +1, 取出.player是蓝色的棋子，然后bl_num +1，决定下棋的是谁
         """
         red_count = 0
@@ -297,7 +306,7 @@ class Agent:
         #print("simulation 完成棋盘状态，在找哪个颜色的best_action: ",self._color)
         #print(state.render())
         if state.winner_color == PlayerColor.RED:
-           # print("simulation 红色胜利,返回1")
+            #print("simulation 红色胜利,返回1")
             return 1
         else:
            # print("simulation 蓝色胜利，返回-1")
