@@ -8,13 +8,14 @@ from referee.game import \
 from referee.game.board import Board
 
 class Node:
-    def __init__(self, state: Board, parent=None, action=None):
+    def __init__(self, state: Board, parent=None, action=None, action_colour=None):
         self.state = state  #当前节点的状态,当前棋盘状态
         self.parent =  parent #当前节点的父节点
         self.action = action #从父节点到当前节点的动作
         self.children = [] #当前节点的子节点
         self.wins = 0  #当前节点的胜利次数
         self.visits = 0  #当前节点的访问次数
+        self.action_colour = action_colour #当前节点的动作颜色
         
         #self.HexPos = None #HexPos(3, 3) add postion of node
         #self.untried_actions = {} #当前节点的未扩展动作
