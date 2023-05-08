@@ -59,7 +59,7 @@ class Agent:
 
   
     def mcts(self, board) -> Action:
-        num_iterations = 100#，50可以100不可以
+        num_iterations = 50#，50可以100不可以
         print("mcts开始***********************")
          
         root = Node(state=board) #初始化根节点,传入当前棋盘状态")
@@ -67,7 +67,7 @@ class Agent:
         #root_action_list = self.get_action_list(root.state,self._color)
         #action_num = len(root_action_list) 
         while(num_iterations):                 
-            print("num_iterations:",num_iterations)
+            #print("num_iterations:",num_iterations)
            # print("新的iteration 开始了，root的棋盘状态，应该只有一个棋子")
             #print(board.render())
             legal_list =[]
@@ -78,8 +78,8 @@ class Agent:
                 #print("selecton前的slef_color 是：",self._color)
             select_node, legal_list, colour = self.selection(root, self._color) #action_num是当前root的action数量,用于判断是否fully expanded
             #print("当前棋盘状态下，可供选择的action有,legal_list会减少：",legal_list)
-            if(num_iterations<=10):
-                print("selection返回的颜色", colour)
+            #if(num_iterations<=10):
+               # print("selection返回的颜色", colour)
             #print("==================seletion 完成==================")
             # expansion, spread random_node的六个方向
             # *6 spread, + empty cell spawn, random返回一个下一步随机的一个新的点
@@ -272,12 +272,12 @@ class Agent:
         else:
             colour = PlayerColor.RED
            # print("22222") 
-        
+        """
         if(num_iteration <20):
              
             print("准备simulation，expansion后的棋盘状态是")
             print("颜色是：", colour)
-            print(node.state.render())
+            print(node.state.render()) """
 
         
         action_list = self.get_action_list(state, colour)
@@ -374,6 +374,7 @@ class Agent:
         # given a board state, return a list of empty nodes
         #遍历整个字典，选择和coulor相同value的key
         empty_cell_list = []
+        
         rmlist = []
         dir=[(0,1),(0,-1),(1,0),(-1,0),(1,-1),(-1,1)]
         #print(board._state)
@@ -392,6 +393,9 @@ class Agent:
             if board._state[cell].player == None:
                 empty_cell_list.append(cell)
         empty_cell_list=[k for k in empty_cell_list if k not in rmlist]
+        num=len(empty_cell_list)
+        if(num>6):
+             return random.sample(empty_cell_list,6)
         #print("返回空棋盘,没有(3,3)")
         #print(empty_cell_list)
         return empty_cell_list

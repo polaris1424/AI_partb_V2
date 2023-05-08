@@ -56,7 +56,7 @@ class Node:
         for child in self.children:
             if child.visits == 0: # 如果当前子节点没有被访问过，直接返回该子节点
                 return child
-            score = child.wins / child.visits + 2 * sqrt(log(self.visits) / child.visits)  # UCB1算法
+            score = child.wins / child.visits + sqrt(2) * sqrt(log(self.visits) / child.visits)  # UCB1算法
             if score > best_score:  # 更新最佳子节点
                 best_score = score  # 更新最佳子节点的UCB1值
                 best_child = child  # 更新最佳子节点
